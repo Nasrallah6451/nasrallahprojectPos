@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category; // Wajib ada agar tidak error "Class Category not found"
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
+    // Menampilkan semua data kategori
     public function index(): View
     {
         return view('category.category', [
@@ -17,18 +18,35 @@ class CategoryController extends Controller
         ]);
     }
 
+    // Menyimpan kategori baru
     public function store(Request $request): RedirectResponse
     {
-        // 1. Validasi sebaiknya diberi batasan tipe data
         $request->validate([
             "name" => "required|string|max:255",
             "description" => "nullable|string",
         ]);
 
-        // 2. Simpan data
         Category::create($request->all());
 
-        // 3. Redirect ke route yang sesuai di web.php
         return redirect()->route('kategori.index')->with('success', 'Kategori Berhasil Ditambahkan.');
+    }
+
+    // Menampilkan halaman form edit
+    public function edit(Category $kategori): View
+    {
+        return view('category.edit', compact('kategori'))->with(["title" => "Edit Kategori"]);
+    }
+
+    // Memperbarui data kategori ke database
+    public function update(Request $request, Category $kategori): RedirectResponse
+    {
+        $request->validate([
+            "name" => "required|string|max:255",
+            "description" => "nullable|string", // Mengikuti standar store (nullable)
+        ]);
+
+        $kategori->update($request->all());
+
+        return redirect()->route('kategori.index')->with('updated', 'Kategori Berhasil Diubah.');
     }
 }
